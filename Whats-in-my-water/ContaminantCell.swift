@@ -7,18 +7,26 @@
 //
 
 import UIKit
+import QuartzCore
+import Firebase
 
 class ContaminantCell: UITableViewCell {
 
+    @IBOutlet weak var descriptionLbl: UITextView!
+    @IBOutlet weak var levelImg: UIImageView!
+    @IBOutlet weak var contaminantName: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+        
+    func configureCell (contamName: String, contamLevel: String, contamDesc: String) {
+        
+        self.descriptionLbl.text = contamDesc
+        
+        self.contaminantName.text = contamName
+        
+        self.levelImg.image = UIImage(named: contamLevel)
     }
 
 }

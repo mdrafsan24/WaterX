@@ -1,0 +1,6 @@
+framework module Pods_Whats_in_my_water {
+  umbrella header "Pods-Whats-in-my-water-umbrella.h"
+
+  export *
+  module * { export * }
+}

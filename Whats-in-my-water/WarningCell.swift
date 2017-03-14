@@ -9,16 +9,14 @@
 import UIKit
 
 class WarningCell: UITableViewCell {
-
+    @IBOutlet weak var warningLbl: UILabel!
+    @IBOutlet weak var warning: UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    func configureCell (warning: Warnings) {
+        self.warningLbl.text = warning.warning
+        self.warning.isHidden = false
     }
 
 }

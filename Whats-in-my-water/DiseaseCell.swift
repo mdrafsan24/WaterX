@@ -7,18 +7,21 @@
 //
 
 import UIKit
+import UIKit
+import QuartzCore
+import Firebase
 
 class DiseaseCell: UITableViewCell {
 
+    @IBOutlet weak var diseaseName: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    func configureCell (name: DiseaseName) {
+        self.diseaseName.text = name.diseaseName
     }
+    
 
 }

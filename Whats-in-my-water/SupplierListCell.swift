@@ -7,18 +7,21 @@
 //
 
 import UIKit
+import QuartzCore
+import Firebase
 
 class SupplierListCell: UITableViewCell {
 
+    @IBOutlet weak var supplierName: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        
+        
+    }
+    
+    func configureCell(name: SupplierNames) {
+        self.supplierName.text = name.supplierName
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    }
-
+    
 }

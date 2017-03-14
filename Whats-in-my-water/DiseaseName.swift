@@ -7,3 +7,20 @@
 //
 
 import Foundation
+
+class DiseaseName {
+    
+    private var _diseaseName: String!
+    
+    var diseaseName: String {
+        if _diseaseName != nil {
+            return self._diseaseName
+        }
+        return ""
+    }
+    
+    init(name: String) {
+        self._diseaseName = name
+    }
+    
+}

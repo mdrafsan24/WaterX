@@ -7,3 +7,21 @@
 //
 
 import Foundation
+
+class Warnings {
+    private var _warning: String!
+    
+    var warning: String {
+        if _warning != nil {
+            return self._warning
+        }
+        return ""
+    }
+    
+    init (warning: String) {
+        self._warning = warning
+    }
+}
+
+
+
