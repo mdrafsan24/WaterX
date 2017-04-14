@@ -41,8 +41,8 @@ class DetailsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         super.viewDidLoad()
         _supplierId = thingsReceived[0]
         _stateFromBefore = thingsReceived[1]
-        _whichSupplier = ["OH" : DataServices.ds.REF_SUPPLIERNAMES_OH, "NY" : DataServices.ds.REF_SUPPLIERNAMES_NY] // ACTUALLY THE STATE
-        _insideSupplier = ["OH" : DataServices.ds.REF_OH, "NY" : DataServices.ds.REF_NY] // NOW INSIDE SUPPLIER
+        _whichSupplier = ["OH" : DataServices.ds.REF_SUPPLIERNAMES_OH, "NY" : DataServices.ds.REF_SUPPLIERNAMES_NY, "MI" : DataServices.ds.REF_SUPPLIERNAMES_MI] // ACTUALLY THE STATE
+        _insideSupplier = ["OH" : DataServices.ds.REF_OH, "NY" : DataServices.ds.REF_NY, "MI" : DataServices.ds.REF_MI] // NOW INSIDE SUPPLIER
 
         self.completeDataserviceFirebase() //-> FOR NY ONLY
         self.tableView.delegate = self

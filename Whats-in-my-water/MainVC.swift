@@ -10,8 +10,12 @@ import UIKit
 import Firebase
 import CoreLocation
 import Alamofire
-class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
+class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate, UITextFieldDelegate {
     
+    @IBOutlet weak var phoneText: UITextField!
+    @IBOutlet weak var phoneView: UIView!
+    private var _latitude: Double!
+    private var _longitude: Double!
     var locationManager:CLLocationManager!
     var state: String!
     @IBOutlet weak var tableView: UITableView!
@@ -23,7 +27,8 @@ class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        _whichState = ["OH" : DataServices.ds.REF_SUPPLIERNAMES_OH, "NY" : DataServices.ds.REF_SUPPLIERNAMES_NY]
+        self.phoneText.delegate = self
+        _whichState = ["OH" : DataServices.ds.REF_SUPPLIERNAMES_OH, "NY" : DataServices.ds.REF_SUPPLIERNAMES_NY, "MI" : DataServices.ds.REF_SUPPLIERNAMES_MI]
         tableView.delegate = self
         tableView.dataSource = self
         determineMyCurrentLocation() //FOR BOTH OH & NY ONLY
@@ -48,6 +53,7 @@ class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLo
                     if let supplier = snap.value as? String {
                         let supplierName = SupplierNames(name: supplier)
                         self.supplierNames.append(supplierName)
+                        
                     }
                 }
                 
@@ -71,6 +77,10 @@ class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLo
             }
             self.tableView.reloadData()
         }
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.phoneText.resignFirstResponder()
+        return true
     }
     
     func determineMyCurrentLocation() {
@@ -101,10 +111,14 @@ class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLo
                 let placeArray = placemarks as [CLPlacemark]!
                 var placeMark: CLPlacemark!
                 placeMark = placeArray?[0]
+                
                 self.waterSupplier.text = ("Who is you water supplier in \(placeMark.administrativeArea!) state?")
+                
                 self.state = placeMark.administrativeArea!
                 print(placeMark.administrativeArea!)
                 self.firebaseService(state: placeMark.administrativeArea!)//
+                self._latitude = userLocation.coordinate.latitude
+                self._longitude = userLocation.coordinate.longitude
                 //print("THIS IS THE USERS STATE: \(placeMark.administrativeArea!)")
                 
                 //DataServices.ds.state = placeMark.administrativeArea!
@@ -160,6 +174,25 @@ class MainVC: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLo
             }
         }
     }
+    
+    @IBAction func phoneDonePressed(_ sender: Any) {
+        let ref = FIRDatabase.database().reference()
+        let key = ref.child("userPhoneNumberswthLoc").childByAutoId().key
+        
+        let userInput = ["phoneNumber" : self.phoneText.text!,
+                         "latitude" : self._latitude,
+                         "longitude" : self._longitude] as [String : Any]
+        
+        let postFeed = ["\(key)" : userInput]
+        ref.child("userPhoneNumberswthLoc").updateChildValues(postFeed)
+        self.phoneView.isHidden = true
+
+        
+    }
+    @IBAction func noThanksPressed(_ sender: Any) {
+        self.phoneView.isHidden = true
+    }
+    
 
 }
 

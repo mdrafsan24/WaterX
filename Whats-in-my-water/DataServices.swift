@@ -24,10 +24,13 @@ class DataServices {
     private var _REF_BASE = DB_BASE
     private var _REF_NY = DB_BASE.child("NewYorkState") // Into NYS Now
     private var _REF_OH = DB_BASE.child("OH") // Into NYS Now
+    private var _REF_MI = DB_BASE.child("MI") // Into NYS Now
     private var _REF_SUPPLIERNAMES_NY = DB_BASE.child("NewYorkState").child("SupplierNames")
     private var _REF_SUPPLIERNAMES_OH = DB_BASE.child("OH").child("SupplierNames")
+    private var _REF_SUPPLIERNAMES_MI = DB_BASE.child("MI").child("SupplierNames")
     private var _REF_DISEASENAMES = DB_BASE.child("DiseaseList")
     private var _REF_USERDATABASE = DB_BASE.child("UserInputDatabase")
+    private var _REF_SMSDATABASE = DB_BASE.child("UserInputSMS")
     // EDIT : private var _REF_SUPPLIERNAMES_OH = DB_BASE.child("OH").child("County") ******
     
     //Storage Reference
@@ -49,18 +52,26 @@ class DataServices {
     var REF_SUPPLIERNAMES_NY: FIRDatabaseReference {
         return _REF_SUPPLIERNAMES_NY
     }
+    var REF_SUPPLIERNAMES_MI: FIRDatabaseReference {
+        return _REF_SUPPLIERNAMES_MI
+    }
     var REF_SUPPLIERNAMES_OH: FIRDatabaseReference {
         return _REF_SUPPLIERNAMES_OH
     }
     var REF_BASE: FIRDatabaseReference {
         return _REF_BASE
     }
-    
+    var REF_SMSDATABASE: FIRDatabaseReference {
+        return _REF_SMSDATABASE
+    }
     var REF_NY: FIRDatabaseReference {
         return _REF_NY
     }
     var REF_OH: FIRDatabaseReference {
         return _REF_OH
+    }
+    var REF_MI: FIRDatabaseReference {
+        return _REF_MI
     }
     
     // DONE SO FAR

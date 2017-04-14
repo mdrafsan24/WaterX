@@ -82,7 +82,7 @@ class UploadViewController: UIViewController, UITableViewDelegate, UITableViewDa
                          "longitude" : self._longitude,
                          "supplierName" : self._nameOfSupplier
                          ] as [String : Any]
-        // REMEBER TO PUT "complaint" : self.complaintTextFld.text!,
+        
         let postFeed = ["\(key)" : userInput]
         ref.child("UserInputDatabase").updateChildValues(postFeed)
         self.thankYou.isHidden = false

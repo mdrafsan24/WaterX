@@ -12,6 +12,8 @@ import Firebase
 import FirebaseAuth
 import MapKit
 import QuartzCore
+import Alamofire
+
 class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
     
@@ -20,6 +22,7 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
     var numBlueGreen: Int!
     var numRedBrown: Int!
     var warnings = [Warnings]()
+    var coordinateUser = CLLocation()
     override func viewDidLoad() {
         super.viewDidLoad() // Processor when switch between -> we may change the defination from double to float !
         numBlueGreen = 0
@@ -37,6 +40,7 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization()
         locationManager.distanceFilter = 10;
+        
         
         if CLLocationManager.locationServicesEnabled() {
             locationManager.startUpdatingLocation()
@@ -71,7 +75,7 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
                 let latitude = userLocation.coordinate.latitude
                 let longitude = userLocation.coordinate.longitude
                 
-                let coordinateUser = CLLocation(latitude: latitude, longitude: longitude)
+                self.coordinateUser = CLLocation(latitude: latitude, longitude: longitude)
                 
                 self.mapView.setRegion(MKCoordinateRegionMakeWithDistance(CLLocationCoordinate2DMake(latitude, longitude), distancespan, distancespan), animated: true)
                 
@@ -91,7 +95,7 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
                                 
                                 self.mapView.addAnnotation(MapPin)
                                 let coordinatePin = CLLocation(latitude: input["latitude"] as! CLLocationDegrees, longitude: input["longitude"] as! CLLocationDegrees)
-                                let distanceInMeters = coordinateUser.distance(from: coordinatePin)
+                                let distanceInMeters = self.coordinateUser.distance(from: coordinatePin)
                                 
                                 // ^^ Goes through each lat and long and checks distance (in the snaps)
                                 
@@ -109,17 +113,58 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
                                 }
                             }
                         }
-                        if (self.numBlueGreen > 0) {
-                            self.warnings.append(Warnings(warning: "\(self.numBlueGreen!) complaints correlate to an increased copper level. Please check in with your supplier"))
+                        
+                    }
+                    
+                    self.mapView.reloadInputViews()
+                    self.tableView.reloadData()
+                })
+                DataServices.ds.REF_SMSDATABASE.observe(FIRDataEventType.value, with: { (snapshot) in
+                    self.numBlueGreen = 0
+                    self.numRedBrown = 0
+                    var zip = String()
+                    var complaintTOSend = String()
+                    if let snapshot = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                        for snap in snapshot {
+                            
+                            if let data = snap.children.allObjects as? [FIRDataSnapshot] {
+                                if let zipData = data[0].value as? Dictionary<String, Any>{
+                                    if let zipCode = zipData["ZipCode"] as? String {
+                                        zip = zipCode
+                                    }
+                                }
+                                if let complaintData = data[1].value as? Dictionary<String, Any> {
+                                    if let complaint = complaintData["Complaint"] as? String {
+                                        complaintTOSend = complaint
+                                        let newComplaint = complaintTOSend.lowercased()
+                                        
+                                        if (newComplaint.range(of: "blue") != nil) || (newComplaint.range(of: "green") != nil) {
+                                            self.numBlueGreen = (self.numBlueGreen+1)
+                                        }
+                                        if (newComplaint.range(of: "red") != nil) || (newComplaint.range(of: "brown") != nil) {
+                                            self.numRedBrown = (self.numRedBrown+1)
+                                            
+                                        }
+                                    }
+                                }
+                                self.alamofireService(zipCode: zip, complaint: complaintTOSend)
+                            }
+                        
                         }
-                        if (self.numRedBrown > 0) {
-                            self.warnings.append(Warnings(warning: "\(self.numRedBrown!) complaints correlate to an increased iron or manganese level. Please check in with your supplier"))
-                        }
+                        //self.alamofireService(zipCode: zip, complaint: complaintTOSend)
+                        
+                    }
+                    if (self.numBlueGreen > 0) {
+                        self.warnings.append(Warnings(warning: "\(self.numBlueGreen!) complaints in your area correlate to an increased copper level. Please check in with your supplier"))
+                        self.warnings.append(Warnings(warning: "\(self.numBlueGreen!) complaints in your area indidcates that there might be some issues with copper plumbing or brass fittings. Please contact your water supplier immideately!"))
+                        
+                    }
+                    if (self.numRedBrown > 0) {
+                        self.warnings.append(Warnings(warning: "\(self.numRedBrown!) complaints correlate to an increased iron or manganese level. Please check in with your supplier"))
                     }
                     self.mapView.reloadInputViews()
                     self.tableView.reloadData()
                 })
-                
                 //print("THIS IS THE USERS STATE: \(placeMark.administrativeArea!)")
                 
                 //DataServices.ds.state = placeMark.administrativeArea!
@@ -127,6 +172,33 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
         }
         //print("user latitude = \(userLocation.coordinate.latitude)")
         //print("user longitude = \(userLocation.coordinate.longitude)")
+    }
+    func alamofireService(zipCode: String, complaint: String) { // ONLY FOR OHIO FOR NOW
+        
+        Alamofire.request("https://www.zipcodeapi.com/rest/po0UFq25mHXa24h5me8ckkKMjh66LkeaIf4nG7t2PqdRuuXRJ544qOQJ6WQRg52Z/info.json/\(zipCode)/degrees").responseJSON { response in
+            
+            if let JSON = response.result.value as? Dictionary <String,Any> {
+                let locationToPin: CLLocationCoordinate2D = CLLocationCoordinate2DMake((JSON["lat"] as? CLLocationDegrees)!, (JSON["lng"] as? CLLocationDegrees)!)
+                
+                let MapPin = Map(title: complaint, subtitle: "Phone", coordinate: locationToPin)
+                
+                self.mapView.addAnnotation(MapPin)
+                let coordinatePin = CLLocation(latitude: JSON["lat"] as! CLLocationDegrees, longitude: JSON["lng"] as! CLLocationDegrees)
+                let distanceInMeters = self.coordinateUser.distance(from: coordinatePin)
+                
+                if (distanceInMeters < 5000) {
+                    //self.warnings.append(Warnings(warning: complaint))
+                    
+                    self.tableView.reloadData()
+                    
+                }
+                
+            }
+            
+        }
+        self.mapView.reloadInputViews()
+        
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error)
@@ -151,6 +223,7 @@ class MapVC: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate, UIT
         let warning = warnings[indexPath.row]
         
         if let cell = tableView.dequeueReusableCell(withIdentifier: "warningCell") as? WarningCell {
+            
             cell.configureCell(warning: warning)
             return cell
         } else {

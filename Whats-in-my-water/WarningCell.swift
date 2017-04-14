@@ -14,6 +14,7 @@ class WarningCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
     }
+    
     func configureCell (warning: Warnings) {
         self.warningLbl.text = warning.warning
         self.warning.isHidden = false
